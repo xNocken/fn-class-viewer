@@ -39,6 +39,7 @@ const getFilters = (filters: string[]) => {
 		deepextends: <string[]>[],
 		namespace: <string[]>[],
 		has: <string[]>[],
+		hasprop: <string[]>[],
 	};
 
 	filters.forEach((filter) => {
@@ -141,6 +142,12 @@ export async function POST({ request }: RequestEvent) {
 			}
 		}
 
+		if (filters.hasprop.length) {
+			if (!filters.hasprop.every((h) => c.Properties.length && c.Properties.some((p) => matches(p.Name, h)))) {
+				return false;
+			}
+		}
+
 		return true;
 	});
 
@@ -167,6 +174,12 @@ export async function POST({ request }: RequestEvent) {
 			!filters.namespace.every((n) => matches(c.FullName.split('.')[0], n))
 		) {
 			return false;
+		}
+
+		if (filters.hasprop.length) {
+			if (!filters.hasprop.every((h) => c.Properties.length && c.Properties.some((p) => matches(p.Name, h)))) {
+				return false;
+			}
 		}
 
 		return true;
