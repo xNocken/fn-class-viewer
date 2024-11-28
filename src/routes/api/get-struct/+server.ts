@@ -6,12 +6,19 @@ export async function GET({ url }: RequestEvent) {
   const classes = getClasses();
 
   const theStruct = classes.Structs.find((cls) => cls.FullName.toLowerCase() === url.searchParams.get('structname')?.toLowerCase());
+  const theClass = classes.Classes.find((cls) => cls.FullName.toLowerCase() === url.searchParams.get('structname')?.toLowerCase());
 
-  if (!theStruct) {
-    return json({ error: "Struct not found" }, { status: 404 });
+  if (theClass) {
+    theClass.Type = 'class';
+
+    return json(theClass);
   }
 
-  theStruct.Type = 'struct';
+  if (theStruct) {
+    theStruct.Type = 'struct';
 
-  return json(theStruct);
+    return json(theStruct);
+  }
+
+  return json({ error: 'Struct not found' }, { status: 404 });
 }

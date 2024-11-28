@@ -45,7 +45,61 @@
 	};
 
 	const expandedProps: Record<string, boolean> = {};
+	let parentExpanded = false;
 </script>
+
+{#if struct.Parent && struct.Parent !== 'None'}
+	<div class="classes-properties__entry-parent">
+		Parent props
+		
+		<button class="btn btn-primary" on:click={() => (parentExpanded = !parentExpanded)}>
+			{parentExpanded ? 'V' : '>'}
+		</button>
+	</div>
+
+	{#if parentExpanded}
+		{@const innerStruct = getStruct(struct.Parent)}
+
+		{#if innerStruct}
+			<div class="classes-properties__entry-short" style="margin-bottom: 20px; margin-left: 50px;">
+				<div>
+					{Object.entries(EStructFlags)
+						.filter(([, flag]) => typeof flag === 'number' && innerStruct.Flags & flag)
+						.map(([a]) => a.split('_').at(-1))
+						.join(', ')}
+				</div>
+
+				<div>
+					{#if innerStruct.Description}
+						{#each innerStruct.Description.split('\n') as line}
+							{#if line.length}
+								<div class="">
+									{line}
+								</div>
+							{:else}
+								<br />
+							{/if}
+						{/each}
+					{/if}
+				</div>
+			</div>
+		{/if}
+
+		<div class="classes-properties__subentry">
+			{#if innerStruct}
+				<PropertyList
+					struct={innerStruct}
+					{forceHideReplicated}
+					{replicatedOnly}
+					bind:fetchedStructs
+					{parentChecksum}
+				/>
+			{:else}
+				Loading...
+			{/if}
+		</div>
+	{/if}
+{/if}
 
 <div class="classes-properties">
 	{#if !(properties ?? struct?.Properties)?.length}
@@ -256,6 +310,11 @@
 			display: grid;
 			grid-template-columns: 20% 10% 30% 10% 25%;
 			gap: 10px;
+
+			&-parent {
+				padding: 5px;
+				margin-bottom: 10px;
+			}
 		}
 
 		&__entry-short {
